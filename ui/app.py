@@ -136,6 +136,7 @@ body { background: var(--bg0); }
   font: 500 12.5px var(--font); cursor: pointer; transition: all .2s ease;
   white-space: nowrap; text-decoration: none;
 }
+.tp-nav .tp-link { text-decoration: none; }
 .tp-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
 .tp-link.active {
   color: #fff; background: linear-gradient(135deg, rgba(79,140,255,0.18), rgba(106,90,255,0.12));
