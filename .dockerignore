@@ -1,0 +1,49 @@
+# Environment
+.env
+.env.local
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Test / cache / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+tests/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Application runtime / data
+data/
+logs/
+*.log
+
+# Backups / temporary / artifacts / docs
+*_backup*
+*backup*
+Screenshots/
+*.bak
+*.tmp
+*.zip
+*.docx
+
+# VCS / IDE
+.git/
+.gitignore
+.gitattributes
+.dockerignore
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
