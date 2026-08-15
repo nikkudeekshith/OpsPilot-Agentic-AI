@@ -978,33 +978,33 @@ if page == "command":
         # ── TEMPLATES ──
         st.markdown('<div style="font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:1.4px;margin:18px 0 4px;">Quick Investigation Templates</div>',
                     unsafe_allow_html=True)
-        st.markdown('<div class="tmpl-grid">', unsafe_allow_html=True)
+        _tmpl_cols = st.columns(4)
         for i, t in enumerate(TEMPLATES_DATA):
-            is_sel = st.session_state.get("selected_chip", -1) == i
-            led_on = " on" if is_sel else ""
-            st.markdown(f'''
-            <div class="tmpl-card" id="tmpl-{i}">
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span class="tmpl-ico">{t["icon"]}</span>
-                <span style="flex:1;">
-                  <div class="tmpl-label">{t["label"]}</div>
-                  <div class="tmpl-tag">Runbook: {t["dataset"]["runbook"]}</div>
-                </span>
-                <span class="tmpl-led{led_on}"></span>
-              </div>
-            </div>
-            ''', unsafe_allow_html=True)
-            cu, ci = st.columns(2)
-            with cu:
-                if st.button("Use", key=f"tmpl_use_{i}", use_container_width=True):
-                    apply_template(i)
-                    st.toast(f'Template applied: {t["label"]}', icon="✅")
-                    st.rerun()
-            with ci:
-                if st.button("Learn", key=f"tmpl_info_{i}", use_container_width=True):
-                    st.session_state.show_learn_more = i
-                    st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+            with _tmpl_cols[i % 4]:
+                is_sel = st.session_state.get("selected_chip", -1) == i
+                led_on = " on" if is_sel else ""
+                st.markdown(f'''
+                <div class="tmpl-card" id="tmpl-{i}">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="tmpl-ico">{t["icon"]}</span>
+                    <span style="flex:1;">
+                      <div class="tmpl-label">{t["label"]}</div>
+                      <div class="tmpl-tag">Runbook: {t["dataset"]["runbook"]}</div>
+                    </span>
+                    <span class="tmpl-led{led_on}"></span>
+                  </div>
+                </div>
+                ''', unsafe_allow_html=True)
+                cu, ci = st.columns(2)
+                with cu:
+                    if st.button("Use", key=f"tmpl_use_{i}", use_container_width=True):
+                        apply_template(i)
+                        st.toast(f'Template applied: {t["label"]}', icon="✅")
+                        st.rerun()
+                with ci:
+                    if st.button("Learn", key=f"tmpl_info_{i}", use_container_width=True):
+                        st.session_state.show_learn_more = i
+                        st.rerun()
 
         # ── LEARN MORE MODAL ──
         if st.session_state.show_learn_more is not None:
