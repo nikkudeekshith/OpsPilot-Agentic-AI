@@ -95,7 +95,7 @@ body { background: var(--bg0); }
     radial-gradient(800px 500px at 88% -10%, rgba(106, 90, 255, 0.08), transparent 60%),
     radial-gradient(700px 700px at 50% 120%, rgba(34, 211, 238, 0.05), transparent 55%);
 }
-.block-container { max-width: 1280px; padding-top: 1.1rem; padding-bottom: 3rem; position: relative; z-index: 1; }
+.block-container { max-width: 1280px; padding-top: 3.25rem; padding-bottom: 3rem; position: relative; z-index: 1; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -442,7 +442,7 @@ div[data-testid="stMetricLabel"] { color: var(--muted) !important; font-size: 11
   .tmpl-grid { grid-template-columns: repeat(2, 1fr); }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr; }
-  .block-container { padding-top: .6rem; }
+  .block-container { padding-top: 3.25rem; }
 }
 @media (max-width: 480px) {
   .tmpl-grid { grid-template-columns: 1fr; }
