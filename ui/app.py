@@ -1,6 +1,7 @@
 from __future__ import annotations
 import sys
 import json
+import logging
 import time as _time
 import traceback
 from pathlib import Path
@@ -10,6 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 import plotly.graph_objects as go
 from datetime import datetime
+
+logger = logging.getLogger("opspilot.ui")
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  PAGE CONFIG
@@ -665,8 +668,8 @@ def run_investigation_safe(goal, incident_id):
             "plan": state.plan.model_dump() if state.plan else None,
         }
     except Exception:
-        st.error("Investigation failed")
-        print(traceback.format_exc())
+        st.error("Investigation failed. Please check the configured services and try again.")
+        logger.error("Investigation failed for incident '%s':\n%s", incident_id, traceback.format_exc())
         return None
 
 
@@ -1484,8 +1487,18 @@ elif page == "analytics":
                 ed = run_evaluation()
                 st.session_state.eval_data = (ed, _time.time() - t0)
             except Exception:
-                st.markdown(empty_state("⚠️", "Evaluation Failed", "An error occurred while running the evaluation."), unsafe_allow_html=True)
-                print(traceback.format_exc())
+                st.markdown(
+                    empty_state(
+                        "⚠️",
+                        "Evaluation Failed",
+                        "The evaluation could not run in this environment. On Streamlit Cloud, the "
+                        "30-scenario evaluation launches sub-processes which are restricted by the "
+                        "platform sandbox. Run `python main.py evaluate` locally or via the CLI "
+                        "container to get evaluation results.",
+                    ),
+                    unsafe_allow_html=True,
+                )
+                logger.error("Evaluation failed:\n%s", traceback.format_exc())
 
     if st.session_state.eval_data is not None:
         ed, ev_time = st.session_state.eval_data

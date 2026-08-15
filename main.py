@@ -1,7 +1,6 @@
 from __future__ import annotations
 import sys
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 from opspilot.loop import run_investigation
 from opspilot.evaluation.pipeline import run_evaluation
 from opspilot.evaluation.failure_analysis import generate_failure_analysis
@@ -9,6 +8,27 @@ from opspilot.tools.metrics import seed_metrics
 from opspilot.tools.logs import seed_logs
 from opspilot.tools.deployments import seed_deployments
 from opspilot.tools.incidents import seed_incidents
+
+
+def _configure_cli_stdout() -> None:
+    """Reconfigure stdout for clean UTF-8 CLI terminal output (Windows fix).
+
+    Streamlit's script runner does not expose a ``.buffer`` attribute on its
+    stdout object, so accessing it there raises an AttributeError and breaks
+    Streamlit Cloud. Guarding on the presence of ``.buffer`` keeps the fix
+    active for real CLI/terminal sessions while remaining a no-op when the
+    script is executed under ``streamlit run``.
+    """
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is None:
+        return
+    try:
+        sys.stdout = io.TextIOWrapper(buffer, encoding="utf-8", errors="replace")
+    except (AttributeError, TypeError, ValueError):
+        pass
+
+
+_configure_cli_stdout()
 
 
 def cli():

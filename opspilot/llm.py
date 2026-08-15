@@ -12,11 +12,29 @@ except ImportError:
 _openai_client = None
 
 
+def _get_api_key() -> str:
+    """Resolve the OpenAI API key from Streamlit secrets, then environment.
+
+    On Streamlit Cloud the key is configured in the app's Secrets
+    (Settings -> Secrets). Locally it can come from a .env file (loaded by
+    dotenv above) or a shell environment variable. No key is ever hard-coded.
+    """
+    try:
+        import streamlit as st
+
+        key = st.secrets.get("OPENAI_API_KEY", "")
+        if key:
+            return key
+    except Exception:
+        pass
+    return os.environ.get("OPENAI_API_KEY", "")
+
+
 def _get_client():
     global _openai_client
     if _openai_client is None:
         import openai
-        api_key = os.environ.get("OPENAI_API_KEY", "")
+        api_key = _get_api_key()
         if api_key:
             _openai_client = openai.OpenAI(api_key=api_key)
     return _openai_client

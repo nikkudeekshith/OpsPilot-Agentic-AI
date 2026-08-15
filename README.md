@@ -163,6 +163,102 @@ Runs both API (port 8000) and UI (port 8501).
 
 ---
 
+## Streamlit Cloud Deployment
+
+Deploy the exact existing OpsPilot UI to [Streamlit Cloud](https://streamlit.io/cloud) — no
+separate backend service is required. The Streamlit app imports the `opspilot` Python modules
+directly (metrics, logs, deployments, incidents, RAG, agent loop, approvals, observability), so
+`api/main.py` (FastAPI) is optional and not needed for the UI to function.
+
+### 1. GitHub repository
+
+```
+nikkudeekshith/OpsPilot-Agentic-AI
+```
+
+### 2. Branch
+
+```
+main
+```
+
+### 3. Streamlit entry point
+
+The app **must** be pointed at the existing UI file — not `main.py` (which is the CLI entry point):
+
+```
+ui/app.py
+```
+
+| Field | Value |
+|---|---|
+| Repository | `nikkudeekshith/OpsPilot-Agentic-AI` |
+| Branch | `main` |
+| Main file path | `ui/app.py` |
+
+> `main.py` contains a CLI-only `sys.stdout` wrapper. It is isolated so it can never break the
+> Streamlit UI, but `ui/app.py` is the correct Streamlit entry point.
+
+### 4. Required secrets
+
+Configure in **Streamlit Cloud → app → Settings → Secrets**:
+
+```toml
+OPENAI_API_KEY = "sk-..."
+```
+
+The key is **optional but recommended**. Without it, the agent runs in keyword-based fallback
+mode. The app reads the key from Streamlit secrets first, then the `OPENAI_API_KEY` environment
+variable (or a local `.env` file). Never commit a real key — `.env.example` only contains a
+placeholder.
+
+### 5. Required environment variables
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `OPENAI_API_KEY` | No (recommended) | Enables real LLM reasoning/hypothesis generation |
+
+All other configuration is code/data embedded in the repository.
+
+### 6. Local run command
+
+```bash
+streamlit run ui/app.py --server.port 8501
+```
+
+Open `http://localhost:8501`.
+
+### 7. Streamlit Cloud run configuration
+
+- **Python version:** the platform default (3.11/3.12) is supported.
+- **Dependencies:** installed automatically from `requirements.txt`.
+- **Secrets:** add `OPENAI_API_KEY` as shown above, then **Rerun** the app.
+- **Deploys:** push to the `main` branch (or press "Rerun"/deploy in the dashboard).
+
+### 8. Known limitations on Streamlit Cloud
+
+- **30-scenario evaluation (`Run Full Evaluation`):** the evaluation pipeline isolates each
+  scenario in a sub-process (`subprocess.run`), which the Streamlit Cloud sandbox restricts.
+  The Analytics page will show a friendly message instead of a traceback. Run evaluations
+  locally with `python main.py evaluate` or `python main.py failure-analysis`.
+- **In-memory state:** investigations, trajectories, and approvals live in memory; they reset on
+  rerun and are not persisted between sessions.
+- **Synthetic data:** metrics, logs, deployments, and incidents are simulated — connect your own
+  monitoring systems to generalize.
+- **Optional embeddings:** `sentence-transformers` is intentionally not required; the RAG layer
+  falls back to keyword scoring when it is absent.
+
+### 9. Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `AttributeError: ... has no attribute 'buffer'` | Make sure the Main file path is `ui/app.py` (not `main.py`). |
+| UI loads but investigations use fallback reasoning | Add `OPENAI_API_KEY` to app Secrets and Rerun. |
+| Analytics evaluation fails | Expected on Cloud (sub-process sandbox); run evaluation locally via CLI. |
+| Changes not appearing after push | Confirm you are on `main` and the branch is `main` in the dashboard. |
+
+---
+
 ## Project Structure
 
 ```
