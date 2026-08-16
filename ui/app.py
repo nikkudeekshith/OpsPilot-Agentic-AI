@@ -658,6 +658,8 @@ def run_investigation_safe(goal, incident_id):
         return {
             "goal": goal,
             "incident_id": incident_id,
+            "terminated": state.terminated,
+            "termination_reason": state.termination_reason or "",
             "iterations": state.iteration_count,
             "tool_calls": state.tool_call_count,
             "execution_time": round(getattr(state, "execution_time", 0), 2),
@@ -1150,8 +1152,16 @@ if page == "command":
         """, unsafe_allow_html=True)
 
         rc = st.columns(6)
+        reason = d.get("termination_reason") or ""
+        reason_l = reason.lower()
+        if "complete" in reason_l or (not reason and d.get("report")):
+            status, status_color = "Complete", "#34D399"
+            status_sub = "Investigation finished"
+        else:
+            status, status_color = "Inconclusive", "#F59E0B"
+            status_sub = reason or "Investigation did not reach a conclusion"
         rstat_html = [
-            ("Status", "Complete", "", "#34D399"),
+            ("Status", status, status_sub, status_color),
             ("Iterations", f"{d['iterations']}", "", "#4F8CFF"),
             ("Tool Calls", f"{d['tool_calls']}", "", "#22D3EE"),
             ("Duration", f"{d['execution_time']}s", "", "#FBBF24"),

@@ -261,5 +261,28 @@ def run_investigation(goal: str, incident_id: str = "INC-001") -> AgentState:
 
         logger.log_step(state, f"Executed {tool_call.tool}", tool_call=tool_call.model_dump(), result=result.model_dump())
 
+    if state.report is None and state.hypotheses:
+        best = max(state.hypotheses, key=lambda h: h.confidence)
+        state.report = IncidentReport(
+            root_cause=best.description,
+            confidence=best.confidence,
+            evidence=state.evidence[-5:],
+            contradictory_evidence=state.reflection.contradictions if state.reflection else [],
+            alternative_hypotheses=[h.description for h in state.hypotheses if h is not best],
+            recommended_action=(
+                f"Rollback deployment associated with {best.description}" if best.confidence >= 0.8
+                else "Perform additional validation checks before remediation" if best.confidence >= 0.6
+                else "Further investigation required"
+            ),
+            requires_approval=best.confidence >= 0.8,
+        )
+
+    if state.reflection is None:
+        state.reflection = ReflectionResult(
+            evidence_sufficient=state.report is not None,
+            critique=state.termination_reason or "Investigation ended without a final reflection.",
+            reasoning=f"Collected {len(state.evidence)} evidence items across {len(state.tool_history)} tool calls.",
+        )
+
     state.execution_time = round(_time.time() - start_ts, 2)
     return state
