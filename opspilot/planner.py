@@ -51,19 +51,19 @@ DEFAULT_PLAN = Plan(
 def create_plan(goal: str) -> Plan:
     goal_lower = goal.lower()
     if "latency" in goal_lower:
-        return INVESTIGATION_TEMPLATES["latency"]
+        return INVESTIGATION_TEMPLATES["latency"].model_copy(deep=True)
     if "error" in goal_lower or "fail" in goal_lower:
-        return INVESTIGATION_TEMPLATES["error_rate"]
+        return INVESTIGATION_TEMPLATES["error_rate"].model_copy(deep=True)
     if "timeout" in goal_lower or "database" in goal_lower or "db" in goal_lower:
-        return INVESTIGATION_TEMPLATES["timeout"]
-    return DEFAULT_PLAN
+        return INVESTIGATION_TEMPLATES["timeout"].model_copy(deep=True)
+    return DEFAULT_PLAN.model_copy(deep=True)
 
 
 def re_plan(plan: Plan, completed_step_descriptions: list[str],
             new_goal: str | None = None) -> Plan:
     if new_goal:
         return create_plan(new_goal)
-    remaining = [s for s in plan.steps if s.description not in completed_step_descriptions]
+    remaining = [s.model_copy(deep=True) for s in plan.steps if s.description not in completed_step_descriptions]
     if not remaining:
         remaining = [Step(description="Perform deeper investigation: check resource metrics and logs with different filters",
                           tool="query_metrics", goal="Gather additional evidence")]
