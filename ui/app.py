@@ -41,6 +41,20 @@ seed_logs()
 seed_deployments()
 seed_incidents()
 
+def _build_hash() -> str:
+    try:
+        import subprocess
+        return subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, timeout=3,
+            cwd=str(Path(__file__).resolve().parent.parent),
+        ).stdout.strip() or "unknown"
+    except Exception:
+        return "unknown"
+
+
+BUILD_HASH = _build_hash()
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  DESIGN TOKENS / CSS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1049,7 +1063,7 @@ if page == "command":
 
     with col_side:
         # ── AGENT CONTROL PANEL ──
-        st.markdown("""
+        st.markdown(f"""
         <div class="glass" style="height:100%;">
           <div class="card-title-row">
             <div class="card-ico">🤖</div>
@@ -1070,6 +1084,7 @@ if page == "command":
             <div class="agent-row"><span>Knowledge Base</span><b>8 documents</b></div>
             <div class="agent-row"><span>Max Iterations</span><b>20</b></div>
             <div class="agent-row"><span>Max Tool Calls</span><b>50</b></div>
+            <div class="agent-row"><span>Build</span><b>{BUILD_HASH}</b></div>
           </div>
         </div>
         """, unsafe_allow_html=True)
